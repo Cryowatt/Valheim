@@ -1,0 +1,127 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "saves_storage_account_name": {
+            "type": "String"
+        },
+        "saves_storage_account_key": {
+            "type": "String"
+        },
+        "log_analytics_workspace_id": {
+            "type": "String"
+        },
+        "log_analytics_workspace_key": {
+            "type": "String"
+        },
+        "server_container_name": {
+            "defaultValue": "valheim",
+            "type": "String"
+        },
+        "server_version": {
+            "defaultValue": "latest",
+            "type": "String"
+        },
+        "server_world": {
+            "type": "String"
+        },
+        "server_password": {
+            "type": "String"
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2018-10-01",
+            "name": "[parameters('server_container_name')]",
+            "location": "westus2",
+            "properties": {
+                "containers": [
+                    {
+                        "name": "valheim",
+                        "properties": {
+                            "image": "[concat('cryowatt/valheim:', parameters('server_version'))]",
+                            "command": [
+                                "/server/valheim_server.x86_64",
+                                "-name",
+                                "Cryowatt's Server",
+                                "-port",
+                                "2456",
+                                "-world",
+                                "[parameters('server_world')]",
+                                "-password",
+                                "[parameters('server_password')]"
+                            ],
+                            "ports": [
+                                {
+                                    "port": 2456,
+                                    "protocol": "UDP"
+                                },
+                                {
+                                    "port": 2457,
+                                    "protocol": "UDP"
+                                },
+                                {
+                                    "port": 2458,
+                                    "protocol": "UDP"
+                                }
+                            ],
+                            "volumeMounts": [
+                                {
+                                    "name": "valheimsaves",
+                                    "mountPath": "/saves/"
+                                }
+                            ],
+                            "environmentVariables": [
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 16.0,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "restartPolicy": "OnFailure",
+                "ipAddress": {
+                    "ports": [
+                        {
+                            "port": 2456,
+                            "protocol": "UDP"
+                        },
+                        {
+                            "port": 2457,
+                            "protocol": "UDP"
+                        },
+                        {
+                            "port": 2458,
+                            "protocol": "UDP"
+                        }
+                    ],
+                    "type": "Public",
+                    "dnsNameLabel": "[parameters('server_container_name')]"
+                },
+                "osType": "Linux",
+                "diagnostics": {
+                    "logAnalytics": {
+                        "workspaceId": "[parameters('log_analytics_workspace_id')]",
+                        "workspaceKey": "[parameters('log_analytics_workspace_key')]"
+                    }
+                },
+                "volumes": [
+                    {
+                        "name": "valheimsaves",
+                        "azureFile": {
+                            "shareName": "valheimsaves",
+                            "storageAccountName": "[parameters('saves_storage_account_name')]",
+                            "storageAccountKey": "[parameters('saves_storage_account_key')]"
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

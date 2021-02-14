@@ -1,0 +1,24 @@
+services:
+  steamcmd:
+    platform: linux
+    build:
+      context: .
+      target: steamcmd
+    pull_policy: always
+  server:
+    platform: linux
+    build:
+      context: .
+      args:
+        APPID: ${SERVER_APPID}
+        BUILDID: ${SERVER_BUILDID}
+    image: cryowatt/${SERVER_NAME}:${SERVER_BUILDID}
+    ports:
+      - 2456-2458:2456-2458/udp
+    mem_limit: 16GB
+    deploy:      
+      resources:
+        limits:
+          cpus: '8'
+          memory: 16GB
+    pull_policy: always
