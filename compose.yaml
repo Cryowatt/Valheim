@@ -1,18 +1,22 @@
 services:
+  steamapi:
+    platform: linux
+    image: steamcmd/api
+    pull_policy: always
+    ports: 
+      - 8080:8080
   steamcmd:
     platform: linux
-    build:
-      context: .
-      target: steamcmd
+    image: steamcmd/steamcmd
     pull_policy: always
   server:
     platform: linux
     build:
       context: .
+      target: mod
       args:
-        APPID: ${SERVER_APPID}
         BUILDID: ${SERVER_BUILDID}
-    image: cryowatt/${SERVER_NAME}:${SERVER_BUILDID}
+    image: cryowatt/valheim:${SERVER_BUILDID}
     ports:
       - 2456-2458:2456-2458/udp
     mem_limit: 16GB
@@ -22,3 +26,14 @@ services:
           cpus: '8'
           memory: 16GB
     pull_policy: always
+    entrypoint: "/bin/sh -c"
+    command:
+      - "/opt/valheim/start_server_bepinex.sh"
+      - "-name"
+      - "Local test server"
+      - "-port"
+      - "2456"
+      - "-world"
+      - "Helheim"
+      - "-password"
+      - "password"

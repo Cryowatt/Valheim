@@ -44,7 +44,7 @@
                         "properties": {
                             "image": "[concat('cryowatt/valheim:', parameters('server_version'))]",
                             "command": [
-                                "/server/valheim_server.x86_64",
+                                "/opt/valheim/valheim_server.x86_64",
                                 "-name",
                                 "Cryowatt's Server",
                                 "-port",
@@ -78,8 +78,8 @@
                             ],
                             "resources": {
                                 "requests": {
-                                    "memoryInGB": 16.0,
-                                    "cpu": 1
+                                    "memoryInGB": 6.0,
+                                    "cpu": 2
                                 }
                             }
                         }
